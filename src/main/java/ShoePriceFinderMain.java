@@ -18,7 +18,7 @@ public class ShoePriceFinderMain {
         if(shoeName==null || shoeName.isBlank() || shoeName.isEmpty()){
             shoeName = Config.DEFAULT_SHOE_NAME;
         }
-        System.out.println("Enter your EU size (may not be used in case of some sites): ");
+        System.out.println("Enter your EU size (with dot at decimal place if needed) (size may not be used in case of some sites): ");
         size = scanner.nextLine();
         if(size==null || size.isBlank() || size.isEmpty()){
             size = Config.DEFAULT_SHOE_SIZE;
