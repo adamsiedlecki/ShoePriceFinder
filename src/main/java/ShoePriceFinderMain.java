@@ -1,7 +1,9 @@
 import config.Config;
+import data.Offer;
 import searcher.shopSearcher.ZalandoSearcher;
 import tool.BannerPrinter;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class ShoePriceFinderMain {
@@ -27,18 +29,18 @@ public class ShoePriceFinderMain {
         String gender = scanner.nextLine();
         if(gender==null ){
             System.out.println("Incorrect gender, male used as default.");
-        }else if(gender.equals("f")){
+        } else if (gender.equals("f")) {
             genderMale = false;
         }
-        if(genderMale){
-            System.out.println("Searching started... ( "+shoeName+" MALE "+size+" )");
-        }else{
-            System.out.println("Searching started... ( "+shoeName+" FEMALE "+size+" )");
+        if (genderMale) {
+            System.out.println("Searching started... ( " + shoeName + " MALE " + size + " )");
+        } else {
+            System.out.println("Searching started... ( " + shoeName + " FEMALE " + size + " )");
         }
 
         ZalandoSearcher zalandoSearcher = new ZalandoSearcher();
-        zalandoSearcher.getOffers(shoeName, genderMale, size);
-
+        List<Offer> offers = zalandoSearcher.getOffers(shoeName, genderMale, size);
+        offers.forEach(System.out::println);
 
     }
 }
