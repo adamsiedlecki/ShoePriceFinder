@@ -1,5 +1,6 @@
-package searcher.shopSearcher;
+package searcher.shopSearcher.zalando;
 
+import config.Config;
 import data.Offer;
 import http.ContentSearcher;
 import searcher.Searcher;
@@ -14,7 +15,7 @@ public class ZalandoSearcher implements Searcher {
 
     final String ADDRESS = "https://www.zalando.pl";
     // if url contains forbidden but common string and its length is lower that URL_BORDER_LENGTH, it should be removed
-    private static final int URL_BORDER_LENGTH = 35;
+    private static final int URL_BORDER_LENGTH = 40;
     final int TIMEOUT = 5000;
     final String SHOP_NAME = "Zalando";
     // Strings that cannot be contained by desirable links
@@ -38,13 +39,22 @@ public class ZalandoSearcher implements Searcher {
                     + "__rozmiar-" + size.replace(".", "~") + "/?q=" + shoeNameForUrl, TIMEOUT, ADDRESS);
         }
         List<URL> listWithoutForbidden = getListWithoutForbidden(linksOnPage);
+        listWithoutForbidden = getShortLinksAway(listWithoutForbidden);
         //listWithoutForbidden.forEach(System.out::println);
 
         List<Offer> offers = new ArrayList<>();
         for (URL url : listWithoutForbidden) {
             String content = contentSearcher.getContent(url.toString(), TIMEOUT);
             Offer offer = getOffer(content, url, shoeName);
-            offers.add(offer);
+            if (offer.getName().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND) ||
+                    offer.getImageUrl().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND) ||
+                    offer.getUrl().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND)) {
+
+                System.out.println("Offer is not complete. Url or name may be invalid");
+            } else {
+                offers.add(offer);
+            }
+
 
         }
         return offers;
@@ -56,98 +66,21 @@ public class ZalandoSearcher implements Searcher {
         String offerUrl = url.toString();
         String imageUrl;
 
-        //System.out.println(url.toString()+" | "+html);
-
         String lowerCaseName = shoeName.toLowerCase();
         String lowerCaseHtml = html.toLowerCase();
 
-//        System.out.println(lowerCaseHtml);
-//        System.out.println(lowerCaseName);
         if (!lowerCaseHtml.contains(lowerCaseName)) {
             System.out.println("WEBPAGE: " + url.toString() + "\n PROBABLY IS NOT A CORRECT RESULT");
-            //return null;
+
         }
-        name = getName(html);
-        price = getPrice(html);
-        imageUrl = getImageUrl(html);
+        ZalandoInfoPicker picker = new ZalandoInfoPicker();
+        name = picker.getName(html);
+        price = picker.getPrice(html);
+        imageUrl = picker.getImageUrl(html);
 
 
         Offer offer = new Offer(name, price, imageUrl, offerUrl, SHOP_NAME);
         return offer;
-    }
-
-    private String getImageUrl(String html) {
-        String sectionForSubstring = "_8Nfi4s z-pdp__escape-grid";
-        String htmlImgClass = "Q8HVfj oMyDaX hsKyRV _8Nfi4s BQJRnm uijqg-";
-        html = html.substring(html.indexOf(sectionForSubstring));
-        html = html.substring(html.indexOf(htmlImgClass));
-        String start = "src=\"";
-        html = html.substring(html.indexOf(start) + start.length());
-        html = html.substring(0, html.indexOf("\""));
-        //System.out.println(html);
-
-        return html;
-    }
-
-    private BigDecimal getPrice(String html) {
-        // if on sale, html tags may be different, so:
-        if (html.contains("taniej")) {
-            String price;
-            String nameBegin = "A95iT1 pDVUjz nmA88J _0uQAcH AHAcbe gzB009\">";
-            int startIndex = html.indexOf(nameBegin);
-            startIndex = startIndex + nameBegin.length();
-            String end = "zł</span>";
-            if (startIndex != -1) {
-                price = html.substring(startIndex);
-                price = price.substring(0, price.indexOf(end));
-                price = price.replaceAll("\\s", "");
-                price = price.replaceAll("\\u00A0", "");
-                price = price.replaceAll("&#160;", "");
-                price = price.replaceAll("(^\\h*)|(\\h*$)", "");
-                price = price.replaceAll(",", ".");
-                price = price.trim();
-
-                return new BigDecimal(price);
-            }
-        } else {
-            String price;
-            String nameBegin = "Xb35xC\">";
-            int startIndex = html.indexOf(nameBegin);
-            startIndex = startIndex + nameBegin.length();
-            String end = "zł</span>";
-            if (startIndex != -1) {
-                price = html.substring(startIndex);
-                price = price.substring(0, price.indexOf(end));
-                price = price.replaceAll("\\s", "");
-                price = price.replaceAll("\\u00A0", "");
-                price = price.replaceAll("&#160;", "");
-                price = price.replaceAll("(^\\h*)|(\\h*$)", "");
-                price = price.replaceAll(",", ".");
-                price = price.trim();
-
-                //System.out.println("|"+price+"|");
-                return new BigDecimal(price);
-            } else {
-                System.out.println("PRICE CANNOT BE FOUND");
-            }
-        }
-
-        return BigDecimal.ZERO;
-    }
-
-    private String getName(String html) {
-        String name;
-        String nameBegin = "BicgmA\" tag=\"h1\">";
-        int startIndex = html.lastIndexOf(nameBegin);
-        startIndex = startIndex + nameBegin.length();
-        int endIndex = html.indexOf("</h1>");
-
-        if (startIndex != -1 && endIndex != -1) {
-            name = html.substring(startIndex, endIndex);
-        } else {
-            name = "NAME CANNOT BE FOUND";
-        }
-        return name;
     }
 
     private List<URL> getListWithoutForbidden(Set<URL> urls) {
@@ -171,9 +104,22 @@ public class ZalandoSearcher implements Searcher {
 
             }
         }
-        for(URL url: urlsToDelete){
+        for (URL url : urlsToDelete) {
             urlList.remove(url);
         }
         return urlList;
+    }
+
+    private List<URL> getShortLinksAway(List<URL> urls) {
+        List<URL> urlsToDelete = new ArrayList<>();
+        for (URL url : urls) {
+            if (url.toString().length() < URL_BORDER_LENGTH) {
+                urlsToDelete.add(url);
+            }
+        }
+        for (URL url : urlsToDelete) {
+            urls.remove(url);
+        }
+        return urls;
     }
 }

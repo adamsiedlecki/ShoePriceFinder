@@ -7,7 +7,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,21 +17,22 @@ public class ContentSearcher {
         String content = getContent(address, timeout);
         Set<String> links = extractUrlsFromStringThatStartsWithSlash(content);
         Set<URL> urls = new HashSet<>();
-        for (int i = 0; i <links.size() ; i++) {
+        for (int i = 0; i < links.size(); i++) {
             try {
-                urls.add(new URL((String) domainAddress+links.toArray()[i]));
+                urls.add(new URL(domainAddress + links.toArray()[i]));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
         }
         return urls;
     }
-    public Set<URL> getLinksOnPage(String address, int timeout){
 
+    public Set<URL> getLinksOnPage(String address, int timeout, String domain) {
+        System.out.println(address);
         String content = getContent(address, timeout);
         Set<String> links = extractUrlsFromString(content);
         Set<URL> urls = new HashSet<>();
-        for (int i = 0; i <links.size() ; i++) {
+        for (int i = 0; i < links.size(); i++) {
             try {
                 urls.add(new URL((String) links.toArray()[i]));
             } catch (MalformedURLException e) {

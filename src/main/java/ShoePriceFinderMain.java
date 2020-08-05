@@ -1,52 +1,41 @@
-import config.Config;
 import data.Offer;
+import data.Shoe;
 import excel.RaportCreator;
-import searcher.shopSearcher.ZalandoSearcher;
-import tool.BannerPrinter;
+import searcher.shopSearcher.zalando.ZalandoSearcher;
+import ui.CmdUi;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
 
 public class ShoePriceFinderMain {
     public static void main(String[] args) {
-        BannerPrinter.print();
+        CmdUi cmdUi = new CmdUi();
+        Shoe shoe = cmdUi.getShoeInfo();
 
-        String shoeName;
-        String size;
-        boolean  genderMale = true;
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter shoe name: ");
-        shoeName = scanner.nextLine();
-        if(shoeName==null || shoeName.isBlank() || shoeName.isEmpty()){
-            shoeName = Config.DEFAULT_SHOE_NAME;
-        }
-        System.out.println("Enter your EU size (with dot at decimal place if needed) (size may not be used in case of some sites): ");
-        size = scanner.nextLine();
-        if(size==null || size.isBlank() || size.isEmpty()){
-            size = Config.DEFAULT_SHOE_SIZE;
-        }
-        System.out.println("Enter your gender (m or f): ");
-        String gender = scanner.nextLine();
-        if(gender==null ){
-            System.out.println("Incorrect gender, male used as default.");
-        } else if (gender.equals("f")) {
-            genderMale = false;
-        }
-        if (genderMale) {
-            System.out.println("Searching started... ( " + shoeName + " MALE " + size + " )");
+        String gender;
+        if (shoe.isForMale()) {
+            gender = "MALE";
         } else {
-            System.out.println("Searching started... ( " + shoeName + " FEMALE " + size + " )");
+            gender = "FEMALE";
         }
+        System.out.println("Searching started... ( " + shoe.getShoeName() + " " + gender + " " + shoe.getShoeSize() + " )");
+
+        List<Offer> offers = new ArrayList<>();
+
+//        NikeSearcher nikeSearcher = new NikeSearcher();
+//        nikeSearcher.getOffers(shoeName, genderMale, size);
 
         ZalandoSearcher zalandoSearcher = new ZalandoSearcher();
-        List<Offer> offers = zalandoSearcher.getOffers(shoeName, genderMale, size);
+        offers.addAll(zalandoSearcher.getOffers(shoe.getShoeName(), shoe.isForMale(), shoe.getShoeSize()));
 
+        printOffersAndCreateRaport(offers, shoe.getShoeName(), shoe.getShoeSize(), shoe.isForMale());
+    }
+
+    private static void printOffersAndCreateRaport(List<Offer> offers, String shoeName, String size, boolean genderMale) {
         offers.sort(Comparator.comparing(Offer::getPrice));
         offers.forEach(System.out::println);
-
 
         RaportCreator raportCreator = new RaportCreator();
         try {
