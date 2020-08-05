@@ -7,6 +7,11 @@ public class Offer {
     private final BigDecimal price;
     private final String imageUrl;
     private final String url;
+
+    public String getShopName() {
+        return shopName;
+    }
+
     private final String shopName;
 
     public Offer(String name, BigDecimal price, String imageUrl, String url, String shopName) {

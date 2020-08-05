@@ -20,22 +20,22 @@ public class ZalandoSearcher implements Searcher {
     // Strings that cannot be contained by desirable links
     final List<String> forbiddenList = List.of("faq", "dostawa", "polityka", "reklamacja", "marketing", "home", "tabela",
             "zwrotu", "odziez", "polityka", "obuwie", "prywatnosci", "okazje", "akcesoria", "cart", "rozmiar",
-            "wishlist", "myaccount", "upominkowe", "activation", "firmy", "marki", "regulamin");
+            "wishlist", "myaccount", "upominkowe", "activation", "firmy", "marki", "regulamin", "outfits");
     final List<String> forbiddenButCommonList = List.of("sport");
 
     @Override
     public List<Offer> getOffers(String shoeName, boolean genderMale, String size) {
         ContentSearcher contentSearcher = new ContentSearcher();
 
-        shoeName = shoeName.replace(" ", "+"); // the cannot be whitespace in url
+        String shoeNameForUrl = shoeName.replace(" ", "+"); // the cannot be whitespace in url
         Set<URL> linksOnPage;
         if (genderMale) {
             linksOnPage = contentSearcher.getLinksOnPageThatStartsWithSlash(ADDRESS + "/mezczyzni/"
-                    + "__rozmiar-" + size.replace(".", "~") + "/?q=" + shoeName, TIMEOUT, ADDRESS);
+                    + "__rozmiar-" + size.replace(".", "~") + "/?q=" + shoeNameForUrl, TIMEOUT, ADDRESS);
 
         } else {
             linksOnPage = contentSearcher.getLinksOnPageThatStartsWithSlash(ADDRESS + "/kobiety/"
-                    + "__rozmiar-" + size.replace(".", "~") + "/?q=" + shoeName, TIMEOUT, ADDRESS);
+                    + "__rozmiar-" + size.replace(".", "~") + "/?q=" + shoeNameForUrl, TIMEOUT, ADDRESS);
         }
         List<URL> listWithoutForbidden = getListWithoutForbidden(linksOnPage);
         //listWithoutForbidden.forEach(System.out::println);
@@ -43,19 +43,30 @@ public class ZalandoSearcher implements Searcher {
         List<Offer> offers = new ArrayList<>();
         for (URL url : listWithoutForbidden) {
             String content = contentSearcher.getContent(url.toString(), TIMEOUT);
-            Offer offer = getOffer(content, url);
+            Offer offer = getOffer(content, url, shoeName);
             offers.add(offer);
 
         }
         return offers;
     }
 
-    private Offer getOffer(String html, URL url) {
+    private Offer getOffer(String html, URL url, String shoeName) {
         String name;
         BigDecimal price;
         String offerUrl = url.toString();
         String imageUrl;
 
+        //System.out.println(url.toString()+" | "+html);
+
+        String lowerCaseName = shoeName.toLowerCase();
+        String lowerCaseHtml = html.toLowerCase();
+
+//        System.out.println(lowerCaseHtml);
+//        System.out.println(lowerCaseName);
+        if (!lowerCaseHtml.contains(lowerCaseName)) {
+            System.out.println("WEBPAGE: " + url.toString() + "\n PROBABLY IS NOT A CORRECT RESULT");
+            //return null;
+        }
         name = getName(html);
         price = getPrice(html);
         imageUrl = getImageUrl(html);
@@ -130,7 +141,8 @@ public class ZalandoSearcher implements Searcher {
         int startIndex = html.lastIndexOf(nameBegin);
         startIndex = startIndex + nameBegin.length();
         int endIndex = html.indexOf("</h1>");
-        if (startIndex != -1 || endIndex != -1) {
+
+        if (startIndex != -1 && endIndex != -1) {
             name = html.substring(startIndex, endIndex);
         } else {
             name = "NAME CANNOT BE FOUND";

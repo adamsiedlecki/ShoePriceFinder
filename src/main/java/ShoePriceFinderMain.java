@@ -1,8 +1,11 @@
 import config.Config;
 import data.Offer;
+import excel.RaportCreator;
 import searcher.shopSearcher.ZalandoSearcher;
 import tool.BannerPrinter;
 
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -40,7 +43,16 @@ public class ShoePriceFinderMain {
 
         ZalandoSearcher zalandoSearcher = new ZalandoSearcher();
         List<Offer> offers = zalandoSearcher.getOffers(shoeName, genderMale, size);
+
+        offers.sort(Comparator.comparing(Offer::getPrice));
         offers.forEach(System.out::println);
 
+
+        RaportCreator raportCreator = new RaportCreator();
+        try {
+            raportCreator.saveOffersToExcel(shoeName, size, genderMale, offers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
