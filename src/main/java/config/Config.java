@@ -10,4 +10,5 @@ public class Config {
     public static final String USER_WARNING = "WARNING! TYPE WISELY. \n " +
             "IF YOU TYPE SOMETHING LIKE 'adidas' results may include other clothes, other than shoes. \n" +
             "WEBSITES HTML MAY ALSO CHANGE IN TIME, SO YOU CAN EXPECT MANY BUGS AFTER LONG TIME ;)";
+    public static final String PRICE_IS_NOT_A_CREATABLE_NUMBER = "PRICE IS NOT A CREATABLE NUMBER";
 }

@@ -1,6 +1,7 @@
 import data.Offer;
 import data.Shoe;
 import excel.RaportCreator;
+import searcher.shopSearcher.sneakerShop.SneakerShopSearcher;
 import searcher.shopSearcher.zalando.ZalandoSearcher;
 import ui.CmdUi;
 
@@ -29,6 +30,11 @@ public class ShoePriceFinderMain {
 
         ZalandoSearcher zalandoSearcher = new ZalandoSearcher();
         offers.addAll(zalandoSearcher.getOffers(shoe.getShoeName(), shoe.isForMale(), shoe.getShoeSize()));
+
+        SneakerShopSearcher sneakerShopSearcher = new SneakerShopSearcher();
+        offers.addAll(sneakerShopSearcher.getOffers(shoe.getShoeName(), shoe.isForMale(), shoe.getShoeSize()));
+
+        //offers.forEach(System.out::println);
 
         printOffersAndCreateRaport(offers, shoe.getShoeName(), shoe.getShoeSize(), shoe.isForMale());
     }

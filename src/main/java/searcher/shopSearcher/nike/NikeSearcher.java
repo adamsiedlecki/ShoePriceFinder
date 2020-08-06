@@ -1,6 +1,5 @@
 package searcher.shopSearcher.nike;
 
-import config.Config;
 import data.Offer;
 import http.ContentSearcher;
 import searcher.Searcher;
@@ -38,26 +37,27 @@ public class NikeSearcher implements Searcher {
             linksOnPage = contentSearcher.getLinksOnPage(ADDRESS + "/pl/w/kobiety-5e1x6"
                     + "?q=" + shoeNameForUrl, TIMEOUT, ADDRESS);
         }
-        List<URL> listWithoutForbidden = getListWithoutForbidden(linksOnPage);
-        listWithoutForbidden = getShortLinksAway(listWithoutForbidden);
-        //listWithoutForbidden.forEach(System.out::println);
-
-        List<Offer> offers = new ArrayList<>();
-        for (URL url : listWithoutForbidden) {
-            String content = contentSearcher.getContent(url.toString(), TIMEOUT);
-            Offer offer = getOffer(content, url, shoeName);
-            if (offer.getName().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND) ||
-                    offer.getImageUrl().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND) ||
-                    offer.getUrl().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND)) {
-
-                System.out.println("Offer is not complete. Url or name may be invalid");
-            } else {
-                offers.add(offer);
-            }
-
-
-        }
-        return offers;
+        //Document doc = Jsoup.parse()
+//        List<URL> listWithoutForbidden = getListWithoutForbidden(linksOnPage);
+//        listWithoutForbidden = getShortLinksAway(listWithoutForbidden);
+//        //listWithoutForbidden.forEach(System.out::println);
+//
+//        List<Offer> offers = new ArrayList<>();
+//        for (URL url : listWithoutForbidden) {
+//            String content = contentSearcher.getContent(url.toString(), TIMEOUT);
+//            Offer offer = getOffer(content, url, shoeName);
+//            if (offer.getName().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND) ||
+//                    offer.getImageUrl().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND) ||
+//                    offer.getUrl().equals(Config.HTML_ELEMENT_CANNOT_BE_FOUND)) {
+//
+//                System.out.println("Offer is not complete. Url or name may be invalid");
+//            } else {
+//                offers.add(offer);
+//            }
+//
+//
+//        }
+        return null; //return offers;
     }
 
     private Offer getOffer(String html, URL url, String shoeName) {
