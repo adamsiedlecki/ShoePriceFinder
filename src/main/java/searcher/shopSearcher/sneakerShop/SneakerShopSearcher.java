@@ -30,7 +30,6 @@ public class SneakerShopSearcher implements Searcher {
                 "&filter_pricerange=&text=" + shoeNameForUrl;
 
         /*
-        760 is 40cm
         * filter_traits[1343913850]=86 86 is for women, 87 for men
         * */
 
@@ -40,39 +39,23 @@ public class SneakerShopSearcher implements Searcher {
 
         //System.out.println(addressWithParams);
 
-        List<Offer> offers = new ArrayList<>();
-
         Document doc = null;
         try {
-            doc = Jsoup.connect(addressWithParams).get();
-            List<Element> liList = doc.getElementsByClass("filter_items_1340356124").get(0).getElementsByTag("li");
-            for (Element li : liList) {
-                Element wrapper = li.getElementsByClass("filter_name_wrapper").get(0);
-                String sizeText = wrapper.getElementsByTag("span").attr("data-filter");
-                // example sizeText: 38.5 - 24 cm
-                sizeText = sizeText.replace("-", "");
-                String sizeFragment = sizeText.substring(0, 4);
-                sizeFragment = sizeFragment.trim();
-                System.out.println("SIZE:" + sizeFragment);
-                if (sizeFragment.equals(size)) {
-                    // filter_quantity_1340356124_val758_quantity
-                    String encodedSize = wrapper.getElementsByTag("span").attr("id");
-                    encodedSize = encodedSize.replaceAll("val", "").split("_")[3];
-                    addressWithParams = addressWithParams.replace("760", encodedSize);
-                }
-            }
-            doc = Jsoup.connect(addressWithParams).get();
-            System.out.println(addressWithParams);
-
-            if (doc == null) {
-                return List.of();
-            }
+            doc = includeSizeToURl(doc = Jsoup.connect(addressWithParams).get(), addressWithParams, size);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //System.out.println(doc.text());
+        if (doc == null) {
+            System.out.println(SHOP_NAME + " doc is null!");
+            return List.of();
+        }
+
+        return getOffersFromDoc(doc);
+    }
+
+    private List<Offer> getOffersFromDoc(Document doc) {
+        List<Offer> offers = new ArrayList<>();
         Elements elements = doc.getElementsByClass("product_wrapper_sub");
-        //System.out.println(elements.toString());
         elements.forEach(product -> {
             Elements productNameElements = product.getElementsByClass("product-name");
             String productName = productNameElements.get(0).ownText();
@@ -91,8 +74,34 @@ public class SneakerShopSearcher implements Searcher {
                 System.out.println(Config.PRICE_IS_NOT_A_CREATABLE_NUMBER + productPrice);
             }
         });
-
         return offers;
+    }
+
+    private Document includeSizeToURl(Document doc, String addressWithParams, String size) {
+        try {
+            List<Element> liList = doc.getElementsByClass("filter_items_1340356124").get(0).getElementsByTag("li");
+            for (Element li : liList) {
+                Element wrapper = li.getElementsByClass("filter_name_wrapper").get(0);
+                String sizeText = wrapper.getElementsByTag("span").attr("data-filter");
+                // example sizeText: 38.5 - 24 cm
+                sizeText = sizeText.replace("-", "");
+                String sizeFragment = sizeText.substring(0, 4);
+                sizeFragment = sizeFragment.trim();
+                System.out.println("SIZE:" + sizeFragment);
+                if (sizeFragment.equals(size)) {
+                    // filter_quantity_1340356124_val758_quantity
+                    String encodedSize = wrapper.getElementsByTag("span").attr("id");
+                    encodedSize = encodedSize.replaceAll("val", "").split("_")[3];
+                    addressWithParams = addressWithParams.replace("760", encodedSize);
+                }
+            }
+            doc = Jsoup.connect(addressWithParams).get();
+            System.out.println(addressWithParams);
+            return doc;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return doc;
     }
 
 }
