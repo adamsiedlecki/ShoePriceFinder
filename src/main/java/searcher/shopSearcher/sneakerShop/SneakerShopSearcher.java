@@ -59,8 +59,10 @@ public class SneakerShopSearcher implements Searcher {
                 Element wrapper = li.getElementsByClass("filter_name_wrapper").get(0);
                 String sizeText = wrapper.getElementsByTag("span").attr("data-filter");
                 // example sizeText: 38.5 - 24 cm
+                sizeText = sizeText.replace("-", "");
                 String sizeFragment = sizeText.substring(0, 4);
-                sizeFragment.trim();
+                sizeFragment = sizeFragment.trim();
+                System.out.println("SIZE:" + sizeFragment);
                 if (sizeFragment.equals(size)) {
                     // filter_quantity_1340356124_val758_quantity
                     String encodedSize = wrapper.getElementsByTag("span").attr("id");
