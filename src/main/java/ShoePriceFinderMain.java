@@ -25,6 +25,7 @@ public class ShoePriceFinderMain {
 
         List<Offer> offers = new ArrayList<>();
 
+        // I dont support Nike
 //        NikeSearcher nikeSearcher = new NikeSearcher();
 //        nikeSearcher.getOffers(shoeName, genderMale, size);
 
@@ -34,7 +35,9 @@ public class ShoePriceFinderMain {
         SneakerShopSearcher sneakerShopSearcher = new SneakerShopSearcher();
         offers.addAll(sneakerShopSearcher.getOffers(shoe.getShoeName(), shoe.isForMale(), shoe.getShoeSize()));
 
-        //offers.forEach(System.out::println);
+        // Chmielna20 hass Cloudflare protection
+//        Chmielna20Searcher chmielna20Searcher = new Chmielna20Searcher();
+//        offers.addAll(chmielna20Searcher.getOffers(shoe.getShoeName(), shoe.isForMale(), shoe.getShoeSize()));
 
         printOffersAndCreateRaport(offers, shoe.getShoeName(), shoe.getShoeSize(), shoe.isForMale());
     }
